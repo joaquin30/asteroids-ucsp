@@ -70,7 +70,7 @@ class Ship:
 
 class Asteroid:
     def __init__(self, pos, angle, size):
-        self.origin = pygame.image.load('assets/meteor.png').convert_alpha()
+        self.origin = pygame.image.load('assets/asteroids.png').convert_alpha()
         self.origin = pygame.transform.scale(self.origin, size)
         self.img = self.origin
         self.rect = self.img.get_rect(topleft = pos)
