@@ -5,7 +5,9 @@ class BigLabel:
         self.size = size
         self.pos = pos
         self.font = pygame.font.Font('assets/Goldman-Regular.ttf', 36)
-        self.words = [word.split(' ') for word in text.splitlines()]
+        self.words = []
+        for word in text.splitlines():
+            self.words.append(word.split(' '))
         self.space = self.font.size(' ')[0]
     
     def draw(self, screen):
@@ -23,10 +25,12 @@ class BigLabel:
             y += word_height # Inicia nueva fila
 
 class Label:
-    def __init__(self, text):
+    def __init__(self, text, pos = None):
         font = pygame.font.Font('assets/Goldman-Regular.ttf', 36)
-        self.text = font.render(text, True, (255, 255, 255))
+        self.text = font.render(text, True, (255, 255, 255)) # Blanco
         self.rect = self.text.get_rect()
+        if pos != None:
+            self.rect.topleft = pos
     
     def draw(self, screen):
         screen.blit(self.text, self.rect)

@@ -1,13 +1,14 @@
 import pygame, random, math
-import ui
+import ui, table
 
-def deg(angle):
+def deg(angle): # radianes a grados
     while angle >= 2*math.pi:
         angle -= 2*math.pi
     return (180 * angle) / math.pi
 
-def rad(angle):
-    angle %= 360
+def rad(angle): # grados a radianes
+    while angle >= 360:
+        angle -= 360
     return (math.pi * angle) / 180
 
 class Bullet:
@@ -23,8 +24,8 @@ class Bullet:
         self.rect.centery += self.speed[1]
 
 class Ship:
-    def __init__(self, screen):
-        w,h = screen.get_size()
+    def __init__(self, size):
+        w,h = size
         self.origin = pygame.image.load('assets/ship.png').convert_alpha()
         self.origin = pygame.transform.scale(self.origin, (w//24, w//24))
         self.origin = pygame.transform.rotate(self.origin, -90)
@@ -37,10 +38,17 @@ class Ship:
 
     def rotate(self, pos):
         x, y = pos[0] - self.rect.centerx, -pos[1] + self.rect.centery
-        if y >= 0:
-            self.angle = math.acos(x / math.sqrt(x**2 + y**2))
-        else:
-            self.angle = -math.acos(x / math.sqrt(x**2 + y**2))
+        #self.angle = math.acos(x / math.sqrt(x**2 + y**2))
+        if x == 0:
+            self.angle = math.pi/2 if y >= 0 else 3*math.pi/2
+        elif x > 0 and y > 0: # I
+            self.angle = math.atan(y/x)
+        elif x < 0 and y > 0: # II
+            self.angle = (math.pi/2 - math.atan(y/-x)) + math.pi/2
+        elif x < 0 and y <= 0: # III
+            self.angle = math.atan(y/x) + math.pi
+        elif x > 0 and y <= 0: # IV
+            self.angle = (math.pi/2 - math.atan(-y/x)) + 3*math.pi/2
 
         self.img = pygame.transform.rotate(self.origin, deg(self.angle))
         self.rect = self.img.get_rect(center = self.rect.center)
@@ -73,23 +81,26 @@ class Asteroid:
         screen.blit(self.img, self.rect)
         self.rect.centerx += self.speed[0]
         self.rect.centery += self.speed[1]
+        # rotar asteroide
         self.img = pygame.transform.rotate(self.origin, self.angle)
         self.rect = self.img.get_rect(center = self.rect.center)
         self.angle += 2
-        self.angle %= 360
+        if self.angle >= 360:
+            self.angle = 0
         
 
 class State:
-    def __init__(self, screen):
-        w, h = screen.get_size()
+    def __init__(self, size):
+        self.size = w, h = size
         self.percentage = 0
         self.timer = 0
         self.timer2 = 0
         self.text = ui.Label(str(self.percentage) + '%')
         self.text.rect.center = (w/2, 7*h/8)
-        self.ship = Ship(screen)
+        self.ship = Ship(size)
         self.asteroids = []
         self.asteroid_size = (w//12, w//12)
+        self.score = 0
 
     def handle_input(self, input):
         if self.timer >= 100 and self.percentage > 0:
@@ -103,11 +114,12 @@ class State:
             pos = pygame.mouse.get_pos()
             self.ship.rotate(pos)
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                tmp = random.randrange(0,100)
+                tmp = random.randrange(1, 100) #[1, 99]
                 for i in range(self.percentage):
                     if i == tmp:
-                        return 'MENU'
+                        return 'TABLE'
                 self.ship.shoot(pos)
+                self.score += self.percentage
                 self.percentage += 1
                 self.timer = 0
                 tmp = ui.Label(str(self.percentage) + '%')
@@ -127,11 +139,12 @@ class State:
         i = 0
         while i < len(self.asteroids):
             if self.ship.rect.colliderect(self.asteroids[i].rect):
-                return 'MENU'
+                return 'TABLE'
 
             j = 0
             while j < len(self.ship.bullets):
                 if self.asteroids[i].rect.colliderect(self.ship.bullets[j].rect):
+                    self.score += 5
                     del self.asteroids[i]
                     del self.ship.bullets[j]
                     if i < len(self.asteroids):
@@ -142,7 +155,6 @@ class State:
             i += 1
         
         self.timer += 1
-        return 'NONE'
 
     def draw(self, screen):
         self.text.draw(screen)
@@ -151,30 +163,26 @@ class State:
         
         if self.timer2 == 10:
             self.timer2 = 0
-
+            # 0: arriba, 1: izq, 2: abajo, 3: der
             if tmp == 0:
                 y = 0 - self.asteroid_size[1]
-                x = random.randrange(0, screen.get_size()[0] - self.asteroid_size[0])
+                x = random.randrange(0, screen.get_size()[0])
                 angle = rad(random.randrange(225, 315))
-                speed = (5 * math.cos(angle), 5 * math.sin(angle))
                 self.asteroids.append(Asteroid((x, y), angle, self.asteroid_size))
             elif tmp == 1:
                 x = 0 - self.asteroid_size[0]
-                y = random.randrange(0, screen.get_size()[1] - self.asteroid_size[1])
+                y = random.randrange(0, screen.get_size()[1])
                 angle = rad(random.randrange(315, 405))
-                speed = (5 * math.cos(angle), 5 * math.sin(angle))
                 self.asteroids.append(Asteroid((x, y), angle, self.asteroid_size))
             elif tmp == 2:
                 y = screen.get_size()[1]
-                x = random.randrange(0, screen.get_size()[0]- - self.asteroid_size[0])
+                x = random.randrange(0, screen.get_size()[0])
                 angle = rad(random.randrange(45, 135))
-                speed = (5 * math.cos(angle), 5 * math.sin(angle))
                 self.asteroids.append(Asteroid((x, y), angle, self.asteroid_size))
             else:
                 x = screen.get_size()[0]
-                y = random.randrange(0, screen.get_size()[1] - self.asteroid_size[1])
+                y = random.randrange(0, screen.get_size()[1])
                 angle = rad(random.randrange(135, 225))
-                speed = (5 * math.cos(angle), 5 * math.sin(angle))
                 self.asteroids.append(Asteroid((x, y), angle, self.asteroid_size))
 
         i = 0

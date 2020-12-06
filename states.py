@@ -1,9 +1,9 @@
 import pygame
-import menu, tutorial, game
+import menu, tutorial, game, table
 
 class Background:
-    def __init__(self, screen):
-        self.w = screen.get_size()[0]
+    def __init__(self, width): # ancho
+        self.w = width
         self.bg = pygame.image.load('assets/background.png').convert()
         self.bg = pygame.transform.scale(self.bg, (self.w, self.w))
         self.sound = pygame.mixer.Sound('sound/background.wav')
@@ -18,18 +18,21 @@ class Background:
             self.x = 0
 
 class Manager:
-    def __init__(self, screen):
-        self.state = menu.State(screen)
-        self.bg = Background(screen)
+    def __init__(self, size):
+        self.size = size
+        self.state = menu.State(size)
+        self.bg = Background(size[0])
     
-    def handle_input(self, screen, input):
+    def handle_input(self, input):
         s = self.state.handle_input(input)
         if s == 'GAME':
-            self.state = game.State(screen)
+            self.state = game.State(self.size)
         elif s == 'TUTORIAL':
-            self.state = tutorial.State(screen)
+            self.state = tutorial.State(self.size)
         elif s == 'MENU':
-            self.state = menu.State(screen)
+            self.state = menu.State(self.size)
+        elif s == 'TABLE':
+            self.state = table.State(self.size, self.state.score)
     
     def draw(self, screen):
         self.bg.draw(screen)
