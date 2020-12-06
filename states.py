@@ -6,7 +6,7 @@ class Background:
         self.w = width
         self.bg = pygame.image.load('assets/background.png').convert()
         self.bg = pygame.transform.scale(self.bg, (self.w, self.w))
-        self.sound = pygame.mixer.Sound('sound/background.wav')
+        self.sound = pygame.mixer.Sound('sound/background.mp3')
         self.sound.play(-1)
         self.x = 0
 

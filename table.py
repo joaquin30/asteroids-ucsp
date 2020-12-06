@@ -9,13 +9,15 @@ Guia Score:
 
 class State:
     def __init__(self, size, score):
+        sound = pygame.mixer.Sound('sound/explox.ogg')
+        sound.play()
         w, h = size
         self.lnames = [datetime.datetime.now().strftime(r'%d/%m/%y-%H:%M')]
         self.lscore = [score]
         with open('score.txt') as f:
             tmp = 0
             for line in f:
-                if tmp > 11:
+                if tmp > 9:
                     break
                 n, s = line.split()
                 self.lnames.append(n)

@@ -88,6 +88,22 @@ class Asteroid:
         if self.angle >= 360:
             self.angle = 0
         
+class Explosion:
+    def __init__(self, size, pos):
+        self.imgs = []
+        for i in range(9):
+            tmp = pygame.image.load(f'assets/regularExplosion0{i}.png').convert_alpha()
+            tmp = pygame.transform.scale(tmp, size)
+            self.imgs.append(tmp)
+        self.cnt = 0
+        self.pos = pos
+        self.end = False
+    
+    def draw(self, screen):
+        screen.blit(self.imgs[self.cnt//5], self.pos)
+        self.cnt += 1
+        if self.cnt >= 45:
+            self.end = True
 
 class State:
     def __init__(self, size):
@@ -101,6 +117,7 @@ class State:
         self.asteroids = []
         self.asteroid_size = (w//12, w//12)
         self.score = 0
+        self.explosions = []
 
     def handle_input(self, input):
         if self.timer >= 100 and self.percentage > 0:
@@ -114,7 +131,7 @@ class State:
             pos = pygame.mouse.get_pos()
             self.ship.rotate(pos)
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                tmp = random.randrange(1, 100) #[1, 99]
+                tmp = random.randrange(1, 100) # [1, 99]
                 for i in range(self.percentage):
                     if i == tmp:
                         return 'TABLE'
@@ -148,9 +165,16 @@ class State:
     def draw(self, screen):
         self.text.draw(screen)
         self.ship.draw(screen)
-        tmp = random.randrange(0, 4)
+        i = 0
+        while i < len(self.explosions):
+            if self.explosions[i].end:
+                del self.explosions[i]
+            else:
+                self.explosions[i].draw(screen)
+                i += 1
         
         if self.timer2 == 10:
+            tmp = random.randrange(0, 4)
             self.timer2 = 0
             # 0: arriba, 1: izq, 2: abajo, 3: der
             if tmp == 0:
@@ -188,12 +212,15 @@ class State:
         if len(self.ship.bullets) > 0:
             tmp1 = self.ship.bullets[:]
             tmp2 = self.asteroids[:]
+            i = 0
             for bullet in tmp1:
                 for asteroid in tmp2:
                     if bullet.rect.colliderect(asteroid.rect):
+                        self.explosions.append(Explosion(self.asteroid_size, asteroid.rect.topleft))
                         tmp1.remove(bullet)
                         tmp2.remove(asteroid)
                         self.score += 5
+
             self.ship.bullets = tmp1[:]
             self.asteroids = tmp2[:]
 
