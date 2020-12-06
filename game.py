@@ -137,21 +137,10 @@ class State:
             self.ship.rect.centerx += 3
             
         i = 0
+        # si un asteroid choca con la nave
         while i < len(self.asteroids):
             if self.ship.rect.colliderect(self.asteroids[i].rect):
                 return 'TABLE'
-
-            j = 0
-            while j < len(self.ship.bullets):
-                if self.asteroids[i].rect.colliderect(self.ship.bullets[j].rect):
-                    self.score += 5
-                    del self.asteroids[i]
-                    del self.ship.bullets[j]
-                    if i < len(self.asteroids):
-                        break
-                else:
-                    j += 1
-
             i += 1
         
         self.timer += 1
@@ -194,5 +183,18 @@ class State:
             else:
                 self.asteroids[i].draw(screen)
                 i += 1
+
+        # si una bala choca con un asteroide
+        if len(self.ship.bullets) > 0:
+            tmp1 = self.ship.bullets[:]
+            tmp2 = self.asteroids[:]
+            for bullet in tmp1:
+                for asteroid in tmp2:
+                    if bullet.rect.colliderect(asteroid.rect):
+                        tmp1.remove(bullet)
+                        tmp2.remove(asteroid)
+                        self.score += 5
+            self.ship.bullets = tmp1[:]
+            self.asteroids = tmp2[:]
 
         self.timer2 += 1
