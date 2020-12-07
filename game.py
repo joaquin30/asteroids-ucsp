@@ -153,7 +153,7 @@ class State:
         i = 0
         # si un asteroid choca con la nave
         while i < len(self.asteroids):
-            if self.ship.rect.colliderect(self.asteroids[i].rect):
+            if self.ship.rect.inflate(-50, -50).colliderect(self.asteroids[i].rect.inflate(-50, -50)):
                 return 'TABLE'
             i += 1
         
