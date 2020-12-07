@@ -1,6 +1,6 @@
 # Asteroids
 
-Juego simple de Asteroids hecho con *Python* y *Pygame*.
+Juego simple de Asteroids hecho con Python y Pygame.
 
 ## Diagrama de clases
 
