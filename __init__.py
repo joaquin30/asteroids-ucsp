@@ -1,6 +1,15 @@
 import pygame, sys
 import states
 
+'''
+Grupo 5:
+Joaquin Pino
+Renzo Gallegos
+Selinne Carlin
+Victor Calvo
+Mixel Corrido
+'''
+
 pygame.init()
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
