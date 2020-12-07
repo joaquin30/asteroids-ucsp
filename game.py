@@ -91,8 +91,8 @@ class Asteroid:
 class Explosion:
     def __init__(self, size, pos):
         self.imgs = []
-        for i in range(9):
-            tmp = pygame.image.load(f'assets/regularExplosion0{i}.png').convert_alpha()
+        for i in range(1, 13):
+            tmp = pygame.image.load(f'assets/explo-{i}.png').convert_alpha()
             tmp = pygame.transform.scale(tmp, size)
             self.imgs.append(tmp)
         self.cnt = 0
@@ -100,9 +100,9 @@ class Explosion:
         self.end = False
     
     def draw(self, screen):
-        screen.blit(self.imgs[self.cnt//5], self.pos)
+        screen.blit(self.imgs[self.cnt//2], self.pos)
         self.cnt += 1
-        if self.cnt >= 45:
+        if self.cnt >= 24:
             self.end = True
 
 class State:
