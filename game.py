@@ -28,7 +28,7 @@ class Ship:
         w,h = size
         self.origin = pygame.image.load('assets/ship.png').convert_alpha()
         self.origin = pygame.transform.scale(self.origin, (w//24, w//24))
-        self.origin = pygame.transform.rotate(self.origin, -90)
+        #self.origin = pygame.transform.rotate(self.origin, -90)
         self.bullet_size = (w//100, w//100)
         self.img = self.origin
         self.rect = self.img.get_rect(center = (w/2,h/2))
@@ -38,17 +38,12 @@ class Ship:
 
     def rotate(self, pos):
         x, y = pos[0] - self.rect.centerx, -pos[1] + self.rect.centery
-        #self.angle = math.acos(x / math.sqrt(x**2 + y**2))
-        if x == 0:
-            self.angle = math.pi/2 if y >= 0 else 3*math.pi/2
-        elif x > 0 and y > 0: # I
-            self.angle = math.atan(y/x)
-        elif x < 0 and y > 0: # II
-            self.angle = (math.pi/2 - math.atan(y/-x)) + math.pi/2
-        elif x < 0 and y <= 0: # III
-            self.angle = math.atan(y/x) + math.pi
-        elif x > 0 and y <= 0: # IV
-            self.angle = (math.pi/2 - math.atan(-y/x)) + 3*math.pi/2
+        if x == 0 and y == 0:
+            self.angle = 0
+        elif y > 0: # I
+            self.angle = math.acos(x / math.sqrt(x**2 + y**2))
+        else:
+            self.angle = -math.acos(x / math.sqrt(x**2 + y**2))
 
         self.img = pygame.transform.rotate(self.origin, deg(self.angle))
         self.rect = self.img.get_rect(center = self.rect.center)
@@ -118,6 +113,7 @@ class State:
         self.asteroid_size = (w//12, w//12)
         self.score = 0
         self.explosions = []
+        self.sound = pygame.mixer.Sound('sound/expl2.wav')
 
     def handle_input(self, input):
         if self.timer >= 100 and self.percentage > 0:
@@ -143,15 +139,16 @@ class State:
                 tmp.rect.center = self.text.rect.center
                 self.text = tmp
 
+        # movimiento y bordes
         key_input = pygame.key.get_pressed()
-        if key_input[pygame.K_w]:
-            self.ship.rect.centery -= 3
-        elif key_input[pygame.K_s]:
-            self.ship.rect.centery += 3
-        if key_input[pygame.K_a]:
+        if key_input[pygame.K_a] and self.ship.rect.centerx > 0:
             self.ship.rect.centerx -= 3
-        elif key_input[pygame.K_d]:
+        elif key_input[pygame.K_d] and self.ship.rect.centerx < self.size[0]:
             self.ship.rect.centerx += 3
+        if key_input[pygame.K_w] and self.ship.rect.centery > 0:
+            self.ship.rect.centery -= 3
+        elif key_input[pygame.K_s] and self.ship.rect.centery < self.size[1]:
+            self.ship.rect.centery += 3
             
         i = 0
         # si un asteroid choca con la nave
@@ -216,10 +213,11 @@ class State:
             for bullet in tmp1:
                 for asteroid in tmp2:
                     if bullet.rect.colliderect(asteroid.rect):
+                        self.score += 5
+                        self.sound.play()
                         self.explosions.append(Explosion(self.asteroid_size, asteroid.rect.topleft))
                         tmp1.remove(bullet)
                         tmp2.remove(asteroid)
-                        self.score += 5
 
             self.ship.bullets = tmp1[:]
             self.asteroids = tmp2[:]

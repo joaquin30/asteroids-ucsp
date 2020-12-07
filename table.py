@@ -9,7 +9,7 @@ Guia Score:
 
 class State:
     def __init__(self, size, score):
-        sound = pygame.mixer.Sound('sound/explox.ogg')
+        sound = pygame.mixer.Sound('sound/expl1.wav')
         sound.play()
         w, h = size
         self.lnames = [datetime.datetime.now().strftime(r'%d/%m/%y-%H:%M')]
