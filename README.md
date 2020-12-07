@@ -2,6 +2,10 @@
 
 Juego simple de Asteroids hecho con Python y Pygame.
 
+## Diagrama de módulos
+
+![Módulos](packages_Asteroids.png)
+
 ## Diagrama de clases
 
 ![Diagrama](classes_Asteroids.png)
